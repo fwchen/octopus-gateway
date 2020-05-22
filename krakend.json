@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "extra_config": {
+    "github_com/devopsfaith/krakend-gologging": {
+      "level": "WARNING",
+      "prefix": "[KRAKEND]",
+      "syslog": false,
+      "stdout": true,
+      "format": "logstash"
+    },
+    "github_com/devopsfaith/krakend-logstash": {
+      "enabled": false
+    }
+  },
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+  "name": "octopus_gateway",
+  "endpoints": [
+    {
+      "endpoint": "/new-endpoint",
+      "method": "GET",
+      "extra_config": {}
+    }
+  ]
+}
