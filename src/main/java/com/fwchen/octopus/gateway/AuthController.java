@@ -1,6 +1,7 @@
 package com.fwchen.octopus.gateway;
 
 import com.fwchen.octopus.gateway.request.LoginRequest;
+import com.fwchen.octopus.gateway.response.TokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,25 +21,25 @@ public class AuthController {
     WebClient client;
     AuthService authService;
 
-    AuthController(AuthService authService, @Value("${app.service.core}") String coreServiceUrl, @Value("${jwt.header.key}") String headerKey) {
+    AuthController(AuthService authService, @Value("${app.service.account}") String coreServiceUrl, @Value("${jwt.header.key}") String headerKey) {
         this.client = WebClient.create(coreServiceUrl);
         this.authService = authService;
         this.headerKey = headerKey;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/token")
     Mono<ResponseEntity<Void>> login(@RequestBody LoginRequest loginRequest) {
         return client
                 .post()
-                .uri("authentication")
+                .uri("token-issuer")
                 .body(Mono.just(Map.of("username", loginRequest.getUsername(), "password", loginRequest.getPassword())), Map.class)
                 .exchange()
                 .flatMap(clientResponse -> {
                     if (!clientResponse.statusCode().equals(HttpStatus.OK)) {
                         return Mono.just(ResponseEntity.status(clientResponse.rawStatusCode()).build());
                     }
-                    return clientResponse.bodyToMono(Long.class).flatMap(userID -> {
-                        String jwt = authService.buildJWT(userID);
+                    return clientResponse.bodyToMono(TokenResponse.class).flatMap(token -> {
+                        String jwt = authService.buildJWT();
                         return Mono.just(ResponseEntity.ok().header(headerKey, jwt).build());
                     });
                 });

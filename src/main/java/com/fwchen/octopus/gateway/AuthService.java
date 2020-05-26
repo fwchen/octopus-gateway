@@ -18,14 +18,14 @@ public class AuthService {
     @Value("${jwt.token.expire.time}")
     private long tokenExpireTime;
 
-    public String buildJWT(Long userID){
+    public String buildJWT(String accessToken){
         Date now = new Date();
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         return JWT.create()
                 .withIssuer(issuerName)
                 .withIssuedAt(now)
                 .withExpiresAt(new Date(now.getTime() + tokenExpireTime))
-                .withClaim("userID", userID)
+                .withClaim("accessToken", accessToken)
                 .sign(algorithm);
     }
 }
