@@ -1,6 +1,13 @@
 server:
   port: 8080
 
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          filter:
+            CommonsRequestLoggingFilter: DEBUG
 spring:
   cloud:
     gateway:

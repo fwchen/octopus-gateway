@@ -2,6 +2,7 @@ package com.fwchen.octopus.gateway;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fwchen.octopus.gateway.response.TokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,20 +13,17 @@ public class AuthService {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
-    @Value("${jwt.issuer.name}")
-    private String issuerName;
-
-    @Value("${jwt.token.expire.time}")
-    private long tokenExpireTime;
-
-    public String buildJWT(String accessToken){
+    public String buildJWT(TokenResponse.AccessToken accessToken){
         Date now = new Date();
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         return JWT.create()
-                .withIssuer(issuerName)
+                .withIssuer(accessToken.iss)
                 .withIssuedAt(now)
-                .withExpiresAt(new Date(now.getTime() + tokenExpireTime))
-                .withClaim("accessToken", accessToken)
+                .withJWTId(accessToken.jti)
+                .withSubject(accessToken.sub)
+                .withAudience(accessToken.aud)
+                .withExpiresAt(new Date(now.getTime() + accessToken.exp))
+                .withClaim("userId", accessToken.userId)
                 .sign(algorithm);
     }
 }

@@ -18,48 +18,44 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class AuthFilter implements GlobalFilter, Ordered {
-    @Value("${jwt.header.key}")
-    private String headerKey;
+  @Value("${jwt.header.key}")
+  private String headerKey;
 
-    @Value("${jwt.secret.key}")
-    private String secretKey;
+  @Value("${jwt.secret.key}")
+  private String secretKey;
 
-    @Value("${jwt.issuer.name}")
-    private String issuerName;
+  @Override
+  public int getOrder() {
+    return -100;
+  }
 
-    @Override
-    public int getOrder() {
-        return -100;
+  @Override
+  public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    String token = exchange.getRequest().getHeaders().getFirst(headerKey);
+    if (token == null || token.isEmpty()) {
+      return rejectUnAuthRequest(exchange);
     }
-
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String token = exchange.getRequest().getHeaders().getFirst(headerKey);
-        if (token == null || token.isEmpty()) {
-            return rejectUnAuthRequest(exchange);
-        }
-        try {
-            Long userID = verifyClaimUserID(token);
-            ServerHttpRequest mutableReq = exchange.getRequest().mutate().header("X-App-Auth-UserID", userID.toString()).build();
-            ServerWebExchange mutableExchange = exchange.mutate().request(mutableReq).build();
-            return chain.filter(mutableExchange);
-        } catch (JWTVerificationException e) {
-            return rejectUnAuthRequest(exchange);
-        }
+    try {
+      String userId = verifyClaimUserID(token);
+      ServerHttpRequest mutableReq =
+          exchange.getRequest().mutate().header("X-App-Auth-UserID", userId).build();
+      ServerWebExchange mutableExchange = exchange.mutate().request(mutableReq).build();
+      return chain.filter(mutableExchange);
+    } catch (JWTVerificationException e) {
+      return rejectUnAuthRequest(exchange);
     }
+  }
 
-    private Mono<Void> rejectUnAuthRequest(ServerWebExchange exchange) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        return response.setComplete();
-    }
+  private Mono<Void> rejectUnAuthRequest(ServerWebExchange exchange) {
+    ServerHttpResponse response = exchange.getResponse();
+    response.setStatusCode(HttpStatus.UNAUTHORIZED);
+    return response.setComplete();
+  }
 
-    private Long verifyClaimUserID(String token) {
-        Algorithm algorithm = Algorithm.HMAC256(secretKey);
-        JWTVerifier verifier = JWT.require(algorithm)
-                .withIssuer(issuerName)
-                .build();
-        DecodedJWT jwt = verifier.verify(token);
-        return jwt.getClaim("userID").asLong();
-    }
+  private String verifyClaimUserID(String token) {
+    Algorithm algorithm = Algorithm.HMAC256(secretKey);
+    JWTVerifier verifier = JWT.require(algorithm).build();
+    DecodedJWT jwt = verifier.verify(token);
+    return jwt.getClaim("userId").asString();
+  }
 }
