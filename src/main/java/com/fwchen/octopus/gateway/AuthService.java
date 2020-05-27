@@ -23,9 +23,11 @@ public class AuthService {
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         return JWT.create()
                 .withIssuer(issuerName)
+                .withSubject("auth")
                 .withIssuedAt(now)
                 .withExpiresAt(new Date(now.getTime() + tokenExpireTime))
                 .withClaim("accessToken", accessToken)
                 .sign(algorithm);
+
     }
 }

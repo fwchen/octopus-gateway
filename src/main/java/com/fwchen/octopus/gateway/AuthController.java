@@ -46,6 +46,8 @@ public class AuthController {
                         String jwt = null;
                         try {
                             jwt = authService.buildJWT(mapper.writeValueAsString(token.accessToken));
+                            System.out.println(mapper.writeValueAsString(token.accessToken));
+                            System.out.println(jwt);
                         } catch (JsonProcessingException e) {
                             e.printStackTrace();
                         }
