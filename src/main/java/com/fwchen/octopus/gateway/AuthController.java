@@ -1,5 +1,7 @@
 package com.fwchen.octopus.gateway;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fwchen.octopus.gateway.request.LoginRequest;
 import com.fwchen.octopus.gateway.response.TokenResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,8 +40,15 @@ public class AuthController {
                     if (!clientResponse.statusCode().equals(HttpStatus.OK)) {
                         return Mono.just(ResponseEntity.status(clientResponse.rawStatusCode()).build());
                     }
+                    ObjectMapper mapper = new ObjectMapper();
+
                     return clientResponse.bodyToMono(TokenResponse.class).flatMap(token -> {
-                        String jwt = authService.buildJWT();
+                        String jwt = null;
+                        try {
+                            jwt = authService.buildJWT(mapper.writeValueAsString(token.accessToken));
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
                         return Mono.just(ResponseEntity.ok().header(headerKey, jwt).build());
                     });
                 });
