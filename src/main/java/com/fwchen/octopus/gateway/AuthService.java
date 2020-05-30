@@ -24,6 +24,8 @@ public class AuthService {
                 .withAudience(accessToken.aud)
                 .withExpiresAt(new Date(now.getTime() + accessToken.exp))
                 .withClaim("userId", accessToken.userId)
+                .withClaim("username", accessToken.username)
+                .withClaim("email", accessToken.email)
                 .sign(algorithm);
     }
 }

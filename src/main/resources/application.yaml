@@ -12,14 +12,24 @@ spring:
   cloud:
     gateway:
       routes:
-      - id: coreModule
+      - id: coreImageModule
         uri: http://localhost:9820
         predicates:
-        - Path=/**
+          - Path=/image/**
       - id: accountModule
         uri: http://localhost:9810
         predicates:
           - Path=/register-account
+        filters:
+          - Auth
+      - id: coreModule
+        uri: http://localhost:9820
+        predicates:
+        - Path=/**
+        filters:
+        - Auth
+
+
 
 app:
   service:

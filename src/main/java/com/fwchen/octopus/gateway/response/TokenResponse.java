@@ -10,5 +10,7 @@ public class TokenResponse {
     public String jti;
     public long exp;
     public String userId;
+    public String username;
+    public String email;
   }
 }
