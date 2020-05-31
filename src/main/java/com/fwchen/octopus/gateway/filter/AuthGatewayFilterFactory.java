@@ -8,7 +8,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-import org.springframework.cloud.gateway.filter.factory.GatewayFilterFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -24,7 +23,6 @@ public class AuthGatewayFilterFactory extends AbstractGatewayFilterFactory<AuthG
 
     @Value("${jwt.secret.key}")
     private String secretKey;
-
 
     public AuthGatewayFilterFactory() {
         super(Config.class);
